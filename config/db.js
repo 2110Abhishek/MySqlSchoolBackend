@@ -1,11 +1,11 @@
-import mysql from "mysql2";
+const mysql = require("mysql2");
 
 const db = mysql.createConnection({
-  host: "centerbeam.proxy.rlwy.net", // from Railway
-  port: 21735,                        // use the Railway port, NOT 3306
-  user: "root",                      // check Railway → Variables
-  password: "OPcTmwNWGCwEWHbVfQvAFVCZlzUvHIFr",         // Railway MySQL password
-  database: "railway"                // usually 'railway' unless you renamed
+  host: "centerbeam.proxy.rlwy.net", // Railway public host
+  port: 21735,                        // Railway port
+  user: "root",                       // Railway user
+  password: "OPcTmwNWGCwEWHbVfQvAFVCZlzUvHIFr", // Railway password
+  database: "railway"
 });
 
 db.connect((err) => {
@@ -16,4 +16,4 @@ db.connect((err) => {
   }
 });
 
-export default db;
+module.exports = db;
