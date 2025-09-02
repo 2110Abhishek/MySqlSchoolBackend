@@ -1,3 +1,4 @@
+// backend/server.js
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -16,6 +17,6 @@ app.use("/uploads", express.static(uploadsDir));
 const schoolRoutes = require("./routes/schoolRoutes");
 app.use("/api/schools", schoolRoutes);
 
-// Listen on Railway assigned port
-const PORT = process.env.PORT || 5000;
+// Listen on Railway port
+const PORT = process.env.PORT || 5000; // ONLY for server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
