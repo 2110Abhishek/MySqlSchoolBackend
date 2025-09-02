@@ -1,0 +1,21 @@
+// backend/server.js
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+// Serve static files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Import and use the router
+const schoolRoutes = require("./routes/schoolRoutes");
+app.use("/api/schools", schoolRoutes);
+
+// Start server
+const PORT = 5000;
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on http://localhost:${PORT}`)
+);
