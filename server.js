@@ -17,6 +17,8 @@ app.use("/uploads", express.static(uploadsDir));
 const schoolRoutes = require("./routes/schoolRoutes");
 app.use("/api/schools", schoolRoutes);
 
-// Listen on Railway port
-const PORT = process.env.PORT || 5000; // ONLY for server
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+// Listen on Railway port and 0.0.0.0
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
