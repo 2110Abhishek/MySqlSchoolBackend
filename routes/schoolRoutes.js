@@ -32,90 +32,93 @@ const upload = multer({ storage });
 router.post(
   "/",
   upload.fields([{ name: "image" }, { name: "resume" }]),
-  (req, res) => {
-    const { name, address, city, state, contact, email_id } = req.body;
-    const image = req.files["image"] ? req.files["image"][0].filename : null;
-    const resume = req.files["resume"] ? req.files["resume"][0].filename : null;
+  async (req, res) => {
+    try {
+      const { name, address, city, state, contact, email_id } = req.body;
+      const image = req.files["image"] ? req.files["image"][0].filename : null;
+      const resume = req.files["resume"] ? req.files["resume"][0].filename : null;
 
-    const sql =
-      "INSERT INTO schools (name, address, city, state, contact, email_id, image, resume) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+      const sql =
+        "INSERT INTO schools (name, address, city, state, contact, email_id, image, resume) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-    db.query(
-      sql,
-      [name, address, city, state, contact, email_id, image, resume],
-      (err, result) => {
-        if (err) {
-          console.error("Database error:", err);
-          return res.status(500).json({ error: err.message });
-        }
-        res.json({ message: "School added successfully", id: result.insertId });
-      }
-    );
+      const [result] = await db.execute(
+        sql,
+        [name, address, city, state, contact, email_id, image, resume]
+      );
+      
+      res.json({ message: "School added successfully", id: result.insertId });
+    } catch (err) {
+      console.error("Database error:", err);
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 
 // Get all schools
-router.get("/", (req, res) => {
-  db.query("SELECT * FROM schools", (err, results) => {
-    if (err) {
-      console.error("Database error:", err);
-      return res.status(500).json({ error: "Database fetch failed" });
-    }
+router.get("/", async (req, res) => {
+  try {
+    const [results] = await db.execute("SELECT * FROM schools");
     res.json(results);
-  });
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database fetch failed" });
+  }
 });
 
 // Get single school by ID
-router.get("/:id", (req, res) => {
-  const { id } = req.params;
-  db.query("SELECT * FROM schools WHERE id = ?", [id], (err, results) => {
-    if (err) {
-      console.error("Database error:", err);
-      return res.status(500).json({ error: "Database fetch failed" });
-    }
-    if (results.length === 0)
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [results] = await db.execute("SELECT * FROM schools WHERE id = ?", [id]);
+    
+    if (results.length === 0) {
       return res.status(404).json({ error: "School not found" });
+    }
+    
     res.json(results[0]);
-  });
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database fetch failed" });
+  }
 });
 
 // Update school
 router.put(
   "/:id",
   upload.fields([{ name: "image" }, { name: "resume" }]),
-  (req, res) => {
-    const { id } = req.params;
-    const { name, address, city, state, contact, email_id } = req.body;
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { name, address, city, state, contact, email_id } = req.body;
+      const image = req.files["image"] ? req.files["image"][0].filename : null;
+      const resume = req.files["resume"] ? req.files["resume"][0].filename : null;
 
-    const image = req.files["image"] ? req.files["image"][0].filename : null;
-    const resume = req.files["resume"] ? req.files["resume"][0].filename : null;
-
-    const sql =
-      "UPDATE schools SET name=?, address=?, city=?, state=?, contact=?, email_id=?, image=COALESCE(?, image), resume=COALESCE(?, resume) WHERE id=?";
-    db.query(
-      sql,
-      [name, address, city, state, contact, email_id, image, resume, id],
-      (err, result) => {
-        if (err) {
-          console.error("Update Error:", err);
-          return res.status(500).json({ error: "Database update failed" });
-        }
-        res.json({ message: "School updated successfully" });
-      }
-    );
+      const sql =
+        "UPDATE schools SET name=?, address=?, city=?, state=?, contact=?, email_id=?, image=COALESCE(?, image), resume=COALESCE(?, resume) WHERE id=?";
+      
+      await db.execute(
+        sql,
+        [name, address, city, state, contact, email_id, image, resume, id]
+      );
+      
+      res.json({ message: "School updated successfully" });
+    } catch (err) {
+      console.error("Update Error:", err);
+      res.status(500).json({ error: "Database update failed" });
+    }
   }
 );
 
 // Delete school
-router.delete("/:id", (req, res) => {
-  const { id } = req.params;
-  db.query("DELETE FROM schools WHERE id = ?", [id], (err, result) => {
-    if (err) {
-      console.error("Database error:", err);
-      return res.status(500).json({ error: "Database delete failed" });
-    }
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await db.execute("DELETE FROM schools WHERE id = ?", [id]);
     res.json({ message: "School deleted successfully" });
-  });
+  } catch (err) {
+    console.error("Database error:", err);
+    res.status(500).json({ error: "Database delete failed" });
+  }
 });
 
 module.exports = router;
